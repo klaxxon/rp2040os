@@ -25,7 +25,7 @@ Copy the $PICO_SDK_PATH/external/pico_sdk_import.cmake into main directory.<br/>
 <code>
 $> mkdir build
 $> cd build
-$> cmake ..
+$> cmake .. -DCMAKE_BUILD_TYPE=Debug
 $> make
 </code>
 
