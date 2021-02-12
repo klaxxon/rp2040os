@@ -9,7 +9,7 @@
 #define SYSTEM_CLOCK_HZ 125000000
 #define MAX_CORES 1
 #define USER_TASKS 5
-// Each core has its own idle thread
+// Each core has its own idle thread 
 #define MAX_TASKS (MAX_CORES+USER_TASKS)
 #define SCHED_INTERVAL_US 10000
 #define SCHED_TIMER_NUM 0
@@ -19,7 +19,7 @@
 
 #define USE_THREAD_NAMES 1
 
-#define LED_PIN 25
+#define LED_PIN 25 
 #define LED_PIN2 16
 #define OSC_PIN 15
 #define SQ_PIN 14
@@ -144,7 +144,7 @@ void contextSwitch() {
   if (!cpu) wallTime += ctime; // Time in context
 }
 
-static uint32_t idleStack[IDLE_STACKSIZE];
+static uint32_t idleStack[MAX_CORES][IDLE_STACKSIZE];
 void idle() {
   while (true); asm("wfi"); 
 }
@@ -178,9 +178,9 @@ void setupSched() {
     #endif
     // Stack builds top down
     uint8_t len = IDLE_STACKSIZE;
-    idleStack[--len] = 0x01000000; // Thumb bit of xPSR
-    idleStack[--len] = (uint32_t)idle;  // start of thread routine
-    t->stackPtr = (uint32_t)(idleStack + IDLE_STACKSIZE - 16);
+    idleStack[a][--len] = 0x01000000; // Thumb bit of xPSR
+    idleStack[a][--len] = (uint32_t)idle;  // start of thread routine
+    t->stackPtr = (uint32_t)(idleStack[a] + IDLE_STACKSIZE - 16);
   }
 
   // Starting thread
@@ -302,17 +302,17 @@ void report() {
     lastTime = wallTime;
     printf("\nWall time %llu\n", wallTime/SYSTEM_CLOCK_HZ);
     for(uint8_t a=0;a<MAX_CORES;a++) {
-      printf("CPU%d %llu / %u  %0.3f%%", a, cpuStats[a].contextTime/SYSTEM_CLOCK_HZ, cpuStats[a].ticks, 100.0*cpuStats[a].contextTime/wallTime);
+      printf("CPU%d Ctx=%0.3f%%, Idle=%0.3f%%\n", a, 100.0*cpuStats[a].contextTime/wallTime, 100.0*threads[a].execTime/wallTime);
     }
     #ifdef USE_THREAD_NAMES
     printf("Thrd   Name     S PRI Total     CPU0\n");
     #else
     printf("Thrd   Total   S PRI CPU0\n");
     #endif
-    for(uint8_t a=0;a<threadCount;a++) {
+    for(uint8_t a=MAX_CORES;a<threadCount;a++) {
       Thread *t = &threads[a];
     #ifdef USE_THREAD_NAMES
-      printf("%4d %-10s ", a, t->name);
+      printf("%4d %-10s ", a-MAX_CORES, t->name);
     #else
       printf("%4d ", a);
     #endif
