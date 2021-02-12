@@ -7,7 +7,7 @@
 
 #define Semaphore int32_t
 #define SYSTEM_CLOCK_HZ 125000000
-#define MAX_CORES 1
+#define MAX_CORES 2
 #define USER_TASKS 5
 // Each core has its own idle thread 
 #define MAX_TASKS (MAX_CORES+USER_TASKS)
@@ -110,7 +110,7 @@ void contextSwitch() {
   uint8_t cpriority = 255;
   // Unblock anything waiting if time is up
   // Find highest priority
-  for(uint8_t a=1;a<threadCount;a++) {
+  for(uint8_t a=MAX_CORES;a<threadCount;a++) {
     Thread *t = &threads[a];
     if (t->status == THREAD_STATUS_WAIT) {
       if (t->waitExpires <= wallTime) {
@@ -123,6 +123,7 @@ void contextSwitch() {
   }
 
   // Now find processes matching highest priority
+  if (currentIdx < MAX_CORES) currentIdx = MAX_CORES; // Skip idle threads
   uint8_t a;
   for(a=MAX_CORES;a<threadCount;a++) {
     currentIdx++;
@@ -173,6 +174,7 @@ void setupSched() {
     Thread *t = &threads[a];
     t->execTime = 0;
     t->status = THREAD_STATUS_RUNNING;
+    t->priority = 255;
     #ifdef USE_THREAD_NAMES
     t->name = "IdleThread";
     #endif
@@ -204,32 +206,6 @@ static inline void yield() {
   while (now == (uint8_t)sysCount);
 }
 
-
-void semaphoreInit(Semaphore *s, int32_t initVal) {
-  *s = initVal;
-}
-
-void semaphorePut(Semaphore *s) {
-  asm volatile ("cpsid i\n");
-  *s += 1;
-  asm volatile ("cpsie i\n");
-}
-
-void semaphoreGet(Semaphore *s) {
-  asm volatile ("cpsid i\n");
-  while (*s <= 0) {
-    asm volatile ("cpsie i\n");
-    yield();
-    asm volatile ("cpsid i\n");
-  }
-  *s -= 1;
-  asm volatile ("cpsie i\n");
-}
-
-
-static void removeTask() {
-
-}
 
 // Adds a thread to OS.  Stack points to the beginning of thread stack.  Len is the size of the thread stack.
 #ifdef USE_THREAD_NAMES
@@ -305,9 +281,9 @@ void report() {
       printf("CPU%d Ctx=%0.3f%%, Idle=%0.3f%%\n", a, 100.0*cpuStats[a].contextTime/wallTime, 100.0*threads[a].execTime/wallTime);
     }
     #ifdef USE_THREAD_NAMES
-    printf("Thrd   Name     S PRI Total     CPU0\n");
+    printf("Thrd   Name     S PRI Total     CPU\n");
     #else
-    printf("Thrd   Total   S PRI CPU0\n");
+    printf("Thrd   Total   S PRI CPU\n");
     #endif
     for(uint8_t a=MAX_CORES;a<threadCount;a++) {
       Thread *t = &threads[a];
@@ -326,7 +302,7 @@ void report() {
       } else printf("  ");
       uint64_t telapsed = t->execTime - lasts[a];
       lasts[a] = t->execTime;
-      printf("%3d %6.3f%%  %6.3f%%\n", t->priority, 100.0*t->execTime/wallTime, 100.0*telapsed/elapsed);
+      printf("%3d %6.3f%%\n", t->priority, 100.0*telapsed/elapsed);
     }
   }
 }
