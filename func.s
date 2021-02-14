@@ -3,6 +3,18 @@
 .fpu softvfp
 .extern contextSwitch
 
+.equ SIO_BASE, 0xd0000000
+.equ GPIO_OUT_SET, 0x014
+.equ GPIO_OUT_CLR, 0x018
+.equ GPIO_SET, (SIO_BASE + GPIO_OUT_SET)
+.equ GPIO_CLR, (SIO_BASE + GPIO_OUT_CLR)
+
+// Context switch output pin for external monitoring.
+// The CPU number is added to this so make sure you
+// have this pin and next pin sequentially initialized
+// as outputs.
+//.equ CONTEXTSW_PIN, 14
+
 .thumb
 
 // setPSPControl(uint32_t stackPtr, uint32_t ctrl)
@@ -27,11 +39,37 @@ __setPSP:
   msr psp, r0
   bx lr
 
+.type __setGPIO, %function 
+__setGPIO:
+  push {r0-r3}
+  ldr r1, =#(GPIO_SET)
+  movs r2, #1
+  lsls r2, r0
+  str r2, [r1]
+  pop {r0-r3}
+  bx lr
+
+.type __setGPIO, %function 
+__clrGPIO:
+  push {r0-r3}
+  ldr r1, =#(GPIO_CLR)
+  movs r2, #1
+  lsls r2, r0
+  str r2, [r1]
+  pop {r0-r3}
+  bx lr
+
 
 .global isr_pendsv
 .type isr_pendsv, %function
 isr_pendsv:
   cpsid i // Disable interrupts
+  .ifdef CONTEXTSW_PIN
+  ldr r0, =#0xd0000000
+  ldr r0, [r0] // CPU number
+  adds r0, r0, #(CONTEXTSW_PIN)
+  bl __setGPIO
+  .endif
   mov r3, sp   // Save MSP stackPtr
   mrs r2, psp // Get current stackPtr
   mov sp, r2  // Use the current threads stackPtr
@@ -79,6 +117,13 @@ rnext:
   mov r1, sp
   msr psp, r1
   mov sp, r3
+
+  .ifdef CONTEXTSW_PIN
+  ldr r0, =#0xd0000000
+  ldr r0, [r0] // CPU number
+  adds r0, r0, #(CONTEXTSW_PIN)
+  bl __clrGPIO
+  .endif
 
   ldr r0, =0xfffffffd
   cpsie i // Enable interrupts
