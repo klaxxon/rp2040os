@@ -21,9 +21,10 @@
 
 
 typedef struct CpuStats {
-  uint64_t contextTime;
   uint64_t lastContextTime;
-  uint32_t csCount;  // Context switch count
+  #ifdef COLLECT_STATS
+  uint64_t contextTime;
+  #endif
 } CpuStats;
 
 
@@ -34,20 +35,24 @@ enum threadStatus {
   THREAD_STATUS_DONE = 3,
 };
 
-typedef struct Thread {
+typedef struct Thread Thread;
+struct Thread {
   uint32_t stackPtr;  // Top of stack
   uint8_t pid;
   volatile enum threadStatus status;
+  #ifdef COLLECT_STATS
   uint64_t execTime;
+  volatile uint8_t lastcpu; // Last cpu used
+  #endif
   volatile uint64_t waitExpires;
   #ifdef USE_THREAD_NAMES
   char *name;
   #endif
   uint8_t priority;
   volatile uint8_t cpu; // Active on CPU, 255 = not active
-  volatile uint8_t lastcpu; // Last cpu used
   volatile bool yielded;
-} Thread;
+  Thread *next; // So we do not have to index
+};
 
 extern CpuStats cpuStats[MAX_CORES];
 extern struct Thread threads[MAX_TASKS];
