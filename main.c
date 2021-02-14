@@ -80,7 +80,10 @@ void report() {
 
 static uint32_t spinnerStack[128];
 void spinner() {
-  while (true);
+  while (true) {
+    for(uint16_t a=0;a<25000;a++);
+    yield();
+  }
 }
 
 

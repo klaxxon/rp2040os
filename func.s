@@ -13,7 +13,7 @@
 // The CPU number is added to this so make sure you
 // have this pin and next pin sequentially initialized
 // as outputs.
-//.equ CONTEXTSW_PIN, 14
+.equ CONTEXTSW_PIN, 14
 
 .thumb
 
@@ -27,7 +27,7 @@ setPSPControl:
   isb
   bx lr
 
-
+// Some helper routines
 // __setMSP(uint32_t sp)
 .type __setMSP, %function
 __setMSP:

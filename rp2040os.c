@@ -18,7 +18,6 @@ uint64_t getTimeUs() {
 }
 
 static inline void contextLock() {
-  uint8_t cpu = *(uint32_t*)(SIO_BASE);
   while (!*CONTEXTSWITCH_SPINLOCK);
 }
 
@@ -34,24 +33,28 @@ void isr_systick(void) {
 void contextSwitch() {
   uint64_t now = getTimeUs();
   uint8_t cpu = *(uint32_t*)(SIO_BASE);
-  uint32_t elapsed = (now - cpuStats[cpu].lastContextTime);
-  cpuStats[cpu].csCount++;
+  // Pointers for speed
+  CpuStats *cpustat = &cpuStats[cpu];
+  Thread *ct = currentThread[cpu];
 
-  currentThread[cpu]->execTime += elapsed;
-  currentThread[cpu]->lastcpu = cpu;
-  currentThread[cpu]->cpu = 0xff;
+  uint32_t elapsed = (now - cpustat->lastContextTime);
+  cpustat->csCount++;
 
-  // Mutex section
+  ct->execTime += elapsed;
+  ct->lastcpu = cpu;
+  ct->cpu = 0xff;      // Not running on any core currently
+  ct->yielded = false; // Yield waits for this to reset
+
+  // Exclusive section. Cannot be run by more than one core at a time.
   contextLock();
-
   uint8_t cpriority = 255;
   // Unblock anything waiting if time is up
   // Find highest priority
   for(uint8_t a=MAX_CORES;a<threadCount;a++) {
     Thread *t = &threads[a];
     // Ignore if active on another core
-
     if (t->cpu != 0xff && t->cpu != cpu) continue;
+    // anything waiting for timeout?
     if (t->status == THREAD_STATUS_WAIT) {
       if (t->waitExpires <= now) {
         t->status = THREAD_STATUS_RUNNING;
@@ -79,14 +82,15 @@ void contextSwitch() {
     break;
   }
   if (a >= threadCount) {
-    currentIdx = cpu; // Idle on appropriate core
+    ct = currentThread[cpu] = &threads[cpu]; // Idle on appropriate core
+  } else {
+    ct = currentThread[cpu] = &threads[currentIdx];
   }
-  currentThread[cpu] = &threads[currentIdx];
-  currentThread[cpu]->cpu = cpu;
+  ct->cpu = cpu;
   contextUnlock();
   uint32_t ctime = getTimeUs()-now; // Context time
-  cpuStats[cpu].contextTime +=  ctime; // SysTick counter decrements
-  cpuStats[cpu].lastContextTime = getTimeUs();
+  cpustat->contextTime +=  ctime; // SysTick counter decrements
+  cpustat->lastContextTime = getTimeUs();
 }
 
 static uint32_t idleStack[MAX_CORES][IDLE_STACKSIZE];
@@ -143,12 +147,22 @@ void setupSched() {
   while(1);
 }
 
-static inline void yield() {
+uint8_t getPID() {
+  uint8_t pid;
+  asm("cpsid i");
   uint8_t cpu = *(uint32_t*)(SIO_BASE);
-  uint8_t now = cpuStats[cpu].csCount;  // Keep this so we can watch for it to change
+  pid = currentThread[cpu]->pid;
+  asm("cpsie i");
+  return pid;
+}
+
+
+void yield() {
+  Thread *t = &threads[getPID()];
+  t->yielded = true;
   *(volatile uint32_t *)(0xe0000000|M0PLUS_ICSR_OFFSET) = (1L<<26); // SysTick pending
   // Wait for context switch
-  while (now == (uint8_t)cpuStats[cpu].csCount);
+  while (t->yielded);
 }
 
 
@@ -178,9 +192,9 @@ void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len) {
 
 
 void delayus(uint32_t us) {
-  uint8_t threadID = currentIdx;
-  threads[threadID].waitExpires = getTimeUs() + us;
-  threads[threadID].status = THREAD_STATUS_WAIT;
+  uint8_t pid = getPID();
+  threads[pid].waitExpires = getTimeUs() + us;
+  threads[pid].status = THREAD_STATUS_WAIT;
   yield();
 }
 
