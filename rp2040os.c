@@ -217,4 +217,23 @@ void delayus(uint32_t us) {
   yield();
 }
 
+// For mutexes we use the RP2040s spinlocks.  The OS uses
+// SPINLOCK0 so the other 31 can be used by the applications.
+uint8_t nextMutex = 1;
 
+// Simply save the spinlock number
+void initMutex(Mutex *m) {
+  *m = nextMutex++;
+}
+
+// Spinlocks, when read, return zero if they are already held.
+// If not, they lock and return a non-zero value.
+void mutexLock(Mutex *m) {
+  uint32_t *base = (uint32_t*)(SIO_BASE + 0x100 + (*m<<2));
+  while (!*base);
+}
+
+// To release a spinlock simply write anything into one.
+void mutexUnlock(Mutex *m) {
+  *((uint32_t*)(SIO_BASE + 0x100 + (*m<<2))) = 0;
+}

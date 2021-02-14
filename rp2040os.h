@@ -64,6 +64,10 @@ void delayus(uint32_t us);
 void startStackThread(uint32_t stackPtr);
 uint64_t getTimeUs();
 uint8_t getPID();
+typedef uint32_t Mutex;
+void initMutex(Mutex*);
+void mutexLock(Mutex*);
+void mutexUnlock(Mutex*);
 
 
 // 
