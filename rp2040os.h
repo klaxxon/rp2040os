@@ -52,6 +52,10 @@ struct Thread {
   volatile uint8_t cpu; // Active on CPU, 255 = not active
   volatile bool yielded;
   Thread *next; // So we do not have to index
+  #ifdef STACK_WATCH
+  uint32_t *stack;
+  uint16_t stackSize;
+  #endif
 };
 
 extern CpuStats cpuStats[MAX_CORES];

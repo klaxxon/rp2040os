@@ -39,6 +39,18 @@ void contextSwitch() {
   CpuStats *cpustat = &cpuStats[cpu];
   Thread *ct = currentThread[cpu];
 
+  #ifdef STACK_WATCH
+  if (ct->stack[0] != 0x12345678) {
+    asm("bkpt");
+  }
+  if (ct->stack[ct->stackSize-2] != 0x43218765) {
+    asm("bkpt");
+  }
+  if (ct->stack[ct->stackSize-1] != 0x87654321) {
+    asm("bkpt");
+  }
+  #endif
+
   uint32_t elapsed = (now - cpustat->lastContextTime);
   #ifdef COLLECT_STATS
   ct->execTime += elapsed;
@@ -123,9 +135,17 @@ void setupIdle(uint8_t cpu) {
   #endif
   // Stack builds top down
   uint8_t len = IDLE_STACKSIZE;
-  idleStack[cpu][--len] = 0x01000000; // Thumb bit of xPSR
-  idleStack[cpu][--len] = (uint32_t)idle;  // start of thread routine
-  t->stackPtr = (uint32_t)(idleStack[cpu] + IDLE_STACKSIZE - 16);
+  #ifdef STACK_WATCH
+  t->stack = idleStack[cpu];
+  t->stackSize = len;
+  idleStack[cpu][0] = 0x12345678;
+  idleStack[cpu][len - 1] = 0x87654321;
+  idleStack[cpu][len - 2] = 0x43218765;
+  len-=2;
+  #endif
+  idleStack[cpu][len-1] = 0x01000000; // Thumb bit of xPSR
+  idleStack[cpu][len-2] = (uint32_t)idle;  // start of thread routine
+  t->stackPtr = (uint32_t)(idleStack[cpu] + len - 16);
   currentThread[cpu] = t;
   setPSPControl(t->stackPtr, 2); // Privileged
 }
@@ -176,11 +196,12 @@ void yield() {
 }
 
 
-// Adds a thread to OS.  Stack points to the beginning of thread stack.  Len is the size of the thread stack.
+// Adds a thread to OS.  Stack points to the beginning of thread stack.  Len is the number
+// bytes in the stack.
 #ifdef USE_THREAD_NAMES
 void addThread(char *name, void(*hndl)(void*), uint32_t *stack, uint16_t len, uint8_t priority) {
 #else 
-void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len) {
+void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len, uint8_t priority) {
 #endif
   if (threadCount >= MAX_TASKS) return;
   Thread *t = &threads[threadCount];
@@ -194,6 +215,16 @@ void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len) {
 #ifdef USE_THREAD_NAMES
   t->name = name;
 #endif
+  // Len should be the number of uint32_t entries
+  len >>= 2;
+  #ifdef STACK_WATCH
+  t->stack = stack;
+  t->stackSize = len;
+  stack[0] = 0x12345678;
+  stack[len - 1] = 0x87654321;
+  stack[len - 2] = 0x43218765;
+  len-=2;
+  #endif
   // The first thread is started from main so it needs no stack setup
   // Stack builds top down
   stack[len-1] = 0x01000000; // Thumb bit of xPSR
