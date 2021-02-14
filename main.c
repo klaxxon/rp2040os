@@ -45,7 +45,8 @@ void report() {
     for(uint8_t a=0;a<MAX_CORES;a++) {
       uint64_t exec = threads[a].execTime-lasts[a];
       printf("CPU%d Ctx=%0.3f%%, ", a, 100.0*cpuStats[a].contextTime/now);
-      printf("Idle=%0.3f%%\n", (100.0*exec)/elapsed);
+      float cpu = (100.0*exec)/elapsed;
+      printf("Util=%7.3f%%  Idle=%7.3f%%\n", 100-cpu, cpu);
       lasts[a] = threads[a].execTime;
     }
     #ifdef USE_THREAD_NAMES
