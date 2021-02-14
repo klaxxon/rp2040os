@@ -31,7 +31,7 @@ __setPSP:
 .global isr_pendsv
 .type isr_pendsv, %function
 isr_pendsv:
-  //cpsid i // Disable interrupts
+  cpsid i // Disable interrupts
   mov r3, sp   // Save MSP stackPtr
   mrs r2, psp // Get current stackPtr
   mov sp, r2  // Use the current threads stackPtr
@@ -44,8 +44,12 @@ isr_pendsv:
   push {r4-r7}
 
   mov r2, sp  // Save the current threads stackPtr
+  // cpu offset
+  ldr r1, =#0xd0000000
+  ldr r1, [r1] // CPU number
+  lsls r1, r1, #2  // times 4
   ldr r0, =currentThread
-  ldr r0, [r0]
+  ldr r0, [r0, r1]
   str r2, [r0]
 
   msr msp, r3  // Back to kernel stack
@@ -54,9 +58,13 @@ isr_pendsv:
   bl contextSwitch
 rnext:
   mov r3, sp   // Save MSP stackPtr
+  // cpu offset
+  ldr r1, =#0xd0000000
+  ldr r1, [r1] // CPU number
+  lsls r1, r1, #2  // times 4
   // Get nextStackPtr
   ldr r0, =currentThread
-  ldr r0,[r0]
+  ldr r0, [r0, r1]
   ldr r2, [r0] 
   mov sp, r2
 
@@ -73,7 +81,7 @@ rnext:
   mov sp, r3
 
   ldr r0, =0xfffffffd
-  //cpsie i // Enable interrupts
+  cpsie i // Enable interrupts
   bx r0
 
   
