@@ -7,18 +7,19 @@
     {
       "name": "Cortex SWD",
       "cwd": "${workspaceRoot}",
-      "executable": "./main.elf",
+      "executable": "build/main.elf",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
       "configFiles": ["interface/picoprobe.cfg", "target/rp2040.cfg"],
       "interface": "swd",
       "device": "RP2040",
-      "svdFile": "~/Development/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+      "svdFile": "/home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
       "runToMain": false,
       "preRestartCommands": [
+        "file ./build/main.elf",
         "load",
-        "add-symbol-file ./main.elf 0x08002030",
+        "add-symbol-file build/main.elf 0x08002030",
         "enable breakpoint",
         "monitor reset init"
       ]
