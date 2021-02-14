@@ -3,10 +3,12 @@
 CpuStats cpuStats[MAX_CORES];
 struct Thread threads[MAX_TASKS];
 uint8_t threadCount = MAX_CORES;  // 0-MAX_CORES is idleThread
-volatile uint8_t currentIdx = 0;
+//volatile uint8_t currentIdx = 0;
 // These are so the assembly does not need to use index
 Thread *currentThread[MAX_CORES];
-//Thread *nextThread;
+// This is the last thread checked/executed on the system.
+// Used to continue after and provide fair play between threads.
+Thread *lastThread;
 
 void setPSPControl(uint32_t sp, uint32_t ctrl);
 
@@ -38,20 +40,22 @@ void contextSwitch() {
   Thread *ct = currentThread[cpu];
 
   uint32_t elapsed = (now - cpustat->lastContextTime);
-  cpustat->csCount++;
-
+  #ifdef COLLECT_STATS
   ct->execTime += elapsed;
   ct->lastcpu = cpu;
+  #endif
   ct->cpu = 0xff;      // Not running on any core currently
   ct->yielded = false; // Yield waits for this to reset
 
   // Exclusive section. Cannot be run by more than one core at a time.
   contextLock();
+  // Lowest priority to start
   uint8_t cpriority = 255;
   // Unblock anything waiting if time is up
   // Find highest priority
+  Thread *t = &threads[MAX_CORES];
   for(uint8_t a=MAX_CORES;a<threadCount;a++) {
-    Thread *t = &threads[a];
+    t = t->next;
     // Ignore if active on another core
     if (t->cpu != 0xff && t->cpu != cpu) continue;
     // anything waiting for timeout?
@@ -62,16 +66,14 @@ void contextSwitch() {
     }
     // Ignore if not running
     if (t->status != THREAD_STATUS_RUNNING) continue;
+    // Is this the highest priority?
     if (t->priority < cpriority) cpriority = t->priority;
   }
 
-  // Now find processes matching highest priority
-  if (currentIdx < MAX_CORES) currentIdx = MAX_CORES-1; // Skip idle threads
+  t = lastThread;
   uint8_t a;
   for(a=MAX_CORES;a<threadCount;a++) {
-    currentIdx++;
-    if (currentIdx >= threadCount) currentIdx = MAX_CORES;
-    Thread *t = &threads[currentIdx];
+    t = t->next;
     // Ignpore if active on another cpu
     if (t->cpu != 0xff && t->cpu != cpu) continue;
     // Ignore if not running
@@ -79,18 +81,26 @@ void contextSwitch() {
 
     // Match priority
     if (t->priority != cpriority) continue;
+    // We have found the next thread (after currentIdx) to run with proper priority.
     break;
   }
+  // Did we find a suitable thread?
   if (a >= threadCount) {
+    // No, run the cpus idle thread instead.
     ct = currentThread[cpu] = &threads[cpu]; // Idle on appropriate core
   } else {
-    ct = currentThread[cpu] = &threads[currentIdx];
+    // Yes, point to the thread
+    ct = currentThread[cpu] = t;
+    lastThread = t;
   }
   ct->cpu = cpu;
   contextUnlock();
+  #ifdef COLLECT_STATS
   uint32_t ctime = getTimeUs()-now; // Context time
-  cpustat->contextTime +=  ctime; // SysTick counter decrements
+  // Save some stats
+  cpustat->contextTime += ctime; // SysTick counter decrements
   cpustat->lastContextTime = getTimeUs();
+  #endif
 }
 
 static uint32_t idleStack[MAX_CORES][IDLE_STACKSIZE];
@@ -101,7 +111,9 @@ void idle() {
 
 void setupIdle(uint8_t cpu) {
   Thread *t = &threads[cpu];
+  #ifdef COLLECT_STATS
   t->execTime = 0;
+  #endif
   t->status = THREAD_STATUS_RUNNING;
   t->priority = 255;
   t->cpu = 0xff; // Not active
@@ -135,14 +147,12 @@ void setupSched() {
   // Idle thread
   setupIdle(0);
 
-  // Starting thread
-  currentIdx = MAX_CORES; // First user process
-
   // Systick
   *(volatile unsigned int *)(0xe0000000|M0PLUS_SYST_RVR_OFFSET) = (SYSTEM_CLOCK_HZ / 1000000)*SCHED_INTERVAL_US; // reload count
   *(volatile unsigned int *)(0xe0000000|M0PLUS_SYST_CSR_OFFSET) = 7; // enable, SYSTICK at core clock, exception
   *(volatile unsigned int *)(0xe0000000|M0PLUS_SHPR3_OFFSET) = (0<<30) | (3<<22); // SysTick=0(high), PendSV=3(low) 
   multicore_launch_core1(core1_main);
+  lastThread = &threads[MAX_CORES];
   startStackThread(currentThread[0]->stackPtr); // Does not return
   while(1);
 }
@@ -174,7 +184,9 @@ void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len) {
 #endif
   if (threadCount >= MAX_TASKS) return;
   Thread *t = &threads[threadCount];
+  #ifdef COLLECT_STATS
   t->execTime = 0;
+  #endif
   t->status = THREAD_STATUS_RUNNING;
   t->priority = priority;
   t->cpu = 0xff; // Not active
@@ -187,10 +199,17 @@ void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len) {
   stack[len-1] = 0x01000000; // Thumb bit of xPSR
   stack[len-2] = (uint32_t)hndl;  // start of thread routine
   t->stackPtr = (uint32_t)(stack + len - 16);
+  // Point last thread to this one, if any
+  uint8_t x = threadCount - 1;
+  if (x < MAX_CORES) x = threadCount;
+  threads[x].next = t;
+  // Point this thread to first
+  t->next = &threads[MAX_CORES];
   threadCount++;
 }
 
-
+// Delay thread the specified number of microseconds.
+// Guaranteed to be at least us delay.
 void delayus(uint32_t us) {
   uint8_t pid = getPID();
   threads[pid].waitExpires = getTimeUs() + us;

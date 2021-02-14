@@ -32,6 +32,8 @@ void blink2() {
   }
 }
 
+
+#ifdef COLLECT_STATS
 static uint32_t repStack[256];
 void report() {
   uint64_t lastTime = getTimeUs();
@@ -76,7 +78,7 @@ void report() {
     }
   }
 }
-
+#endif
 
 static uint32_t spinnerStack[128];
 void spinner() {
@@ -100,7 +102,9 @@ int main() {
 
   addThread("Red LED", blink, blinkStack, sizeof(blinkStack)>>2, 100);
   addThread("Green LED", blink2, blink2Stack, sizeof(blink2Stack)>>2, 100);
+  #ifdef COLLECT_STATS
   addThread("Report", report, repStack, sizeof(repStack)>>2, 255);
+  #endif
   addThread("Spinner", spinner, spinnerStack, sizeof(spinnerStack)>>2, 150);
   setupSched(); // No return
 }
