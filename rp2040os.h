@@ -33,6 +33,7 @@ enum threadStatus {
   THREAD_STATUS_RUNNING = 1,// Can be run
   THREAD_STATUS_WAIT = 2,
   THREAD_STATUS_DONE = 3,
+  THREAD_STATUS_ZOMBIE = 4, // Thread exited
 };
 
 typedef struct Thread Thread;

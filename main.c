@@ -70,6 +70,7 @@ void report() {
           case THREAD_STATUS_DONE: printf("X "); break;
           case THREAD_STATUS_RUNNING: printf("R "); break;
           case THREAD_STATUS_WAIT: printf("W "); break;
+          case THREAD_STATUS_ZOMBIE: printf("Z "); break;
         }
       } else printf("  ");
       uint64_t telapsed = t->execTime - lasts[a];
@@ -83,10 +84,12 @@ void report() {
 
 static uint32_t spinnerStack[128];
 void spinner() {
-  while (true) {
+  uint64_t endat = getTimeUs() + 10000000;
+  while (getTimeUs() < endat) {
     for(uint16_t a=0;a<25000;a++);
     yield();
   }
+  printf("\n\nEnding spinner\n\n");
 }
 
 
@@ -101,11 +104,11 @@ int main() {
   gpio_init(CONTEXTSW_PIN+1);
   gpio_set_dir(CONTEXTSW_PIN+1, GPIO_OUT);
 
-  addThread("Red LED", blink, blinkStack, sizeof(blinkStack)>>2, 100);
-  addThread("Green LED", blink2, blink2Stack, sizeof(blink2Stack)>>2, 100);
+  addThread("Red LED", blink, blinkStack, sizeof(blinkStack), 100);
+  addThread("Green LED", blink2, blink2Stack, sizeof(blink2Stack), 100);
   #ifdef COLLECT_STATS
-  addThread("Report", report, repStack, sizeof(repStack)>>2, 255);
+  addThread("Report", report, repStack, sizeof(repStack), 255);
   #endif
-  addThread("Spinner", spinner, spinnerStack, sizeof(spinnerStack)>>2, 150);
+  addThread("Spinner", spinner, spinnerStack, sizeof(spinnerStack), 150);
   setupSched(); // No return
 }

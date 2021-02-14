@@ -196,6 +196,19 @@ void yield() {
 }
 
 
+void removeTask() {
+  Thread *t = &threads[getPID()];
+  t->status = THREAD_STATUS_ZOMBIE;
+  // Find thread pointing to this one
+  for(uint8_t a=MAX_CORES;a<threadCount;a++) {
+    if (threads[a].next == t) {
+      threads[a].next = t->next;
+      break;
+    }
+  }
+  while(1);
+}
+
 // Adds a thread to OS.  Stack points to the beginning of thread stack.  Len is the number
 // bytes in the stack.
 #ifdef USE_THREAD_NAMES
@@ -227,8 +240,9 @@ void addThread(void(*hndl)(void*), uint32_t *stack, uint16_t len, uint8_t priori
   #endif
   // The first thread is started from main so it needs no stack setup
   // Stack builds top down
-  stack[len-1] = 0x01000000; // Thumb bit of xPSR
-  stack[len-2] = (uint32_t)hndl;  // start of thread routine
+  stack[len - 1] = 0x01000000; // Thumb bit of xPSR
+  stack[len - 2] = (uint32_t)hndl;  // start of thread routine
+  stack[len - 3] = (uint32_t)&removeTask;
   t->stackPtr = (uint32_t)(stack + len - 16);
   // Point last thread to this one, if any
   uint8_t x = threadCount - 1;
