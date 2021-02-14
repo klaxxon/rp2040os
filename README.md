@@ -7,6 +7,7 @@ Pre-emptive<br/>
 Thread priority<br/>
 Waits/delays<br/>
 Yield<br/>
+Mutexes<br/>
 <br/>
 <br/>
 As of 917b17b7, the context switch times on the 125MHz Pico are:<br/>
