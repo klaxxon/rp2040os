@@ -1,7 +1,8 @@
 ### Raspberry Pi RP2040 Realtime OS <br/>
 <br/>
 Hobby project to create a simple, pre-emptive, real-time OS support
-for the RP2040. Current capabilities include: <br/>
+for the RP2040. Scheduler code is written in C to allow for easy
+experimentation.  Current capabilities include: <br/>
 <br/>
 Pre-emptive<br/>
 Thread priority<br/>
@@ -10,7 +11,7 @@ Cooperative yield<br/>
 Mutexes<br/>
 <br/>
 <br/>
-As of 917b17b7, the context switch times on the 125MHz Pico are:<br/>
+The context switch times on the 125MHz Pico are:<br/>
 No optimizations <br/>
 No stats collection:  5.8 uS<br/>
 With stats collecton: 9.5 uS<br/>
