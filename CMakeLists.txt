@@ -17,7 +17,7 @@ project(my_project)
 pico_sdk_init()
 
 # rest of your project
-add_executable(main main.c func.s)
+add_executable(main main.c rp2040os.c func.s)
 
 # Add pico_stdlib library which aggregates commonly used features
 target_link_libraries(main pico_stdlib pico_multicore)
