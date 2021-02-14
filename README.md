@@ -12,12 +12,12 @@ Cooperative yield<br/>
 
 The current implementation consists of three files:<br/>
 <br/>
-<code>
+<pre>
 os.c    OS implementation in C<br/>
 func.s  OS implementation function in assembly<br/>
 os.h    OS header file<br/>
 <br/>
-</code>
+</pre>
 
 ### Building<br/>
 export PICO_SDK_PATH=path to your pico-sdk<br/>
