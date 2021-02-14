@@ -24,9 +24,10 @@ Thrd   Name     S PRI  CPU     LastCPU
 The current implementation consists of three files:<br/>
 <br/>
 <pre>
-os.c    OS implementation in C<br/>
-func.s  OS implementation function in assembly<br/>
-os.h    OS header file<br/>
+rp2040os.h    OS header
+rp2040os.c    Implementation in C
+func.s        Implementation function in assembly
+main.c        Example
 <br/>
 </pre>
 
