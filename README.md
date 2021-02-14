@@ -19,4 +19,13 @@ os.h    OS header file<br/>
 <br/>
 </code>
 
+### Building<br/>
+export PICO_SDK_PATH=path to your pico-sdk<br/>
+Copy the $PICO_SDK_PATH/external/pico_sdk_import.cmake into main directory.<br/>
+<pre>
+$> mkdir build
+$> cd build
+$> cmake .. -DCMAKE_BUILD_TYPE=Debug
+$> make
+</pre>
 
