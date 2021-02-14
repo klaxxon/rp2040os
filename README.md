@@ -9,6 +9,7 @@ Thread priority<br/>
 Waits/delays<br/>
 Cooperative yield<br/>
 Mutexes<br/>
+Stack checks (issues breakpoint)<br/>
 <br/>
 <br/>
 The context switch times on the 125MHz Pico are:<br/>
