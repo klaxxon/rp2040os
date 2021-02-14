@@ -13,9 +13,12 @@ Mutexes<br/>
 <br/>
 The context switch times on the 125MHz Pico are:<br/>
 No optimizations <br/>
-No stats collection:     5.8 uS<br/>
-With stats collecton:    9.5 uS<br/>
-With stats/stack checks: 9.9 uS<br/>
+<table>
+   <tr><th></th><th>Context Time</th></tr>
+   <tr><td>No stats collection:</td><td>5.8 uS</td></tr>
+   <tr><td>With stats collecton:</td><td>9.5 uS</td></tr>
+   <tr><td>With stats/stack checks:</td><td> 9.9 uS</td></tr>
+</table>
 <br/>
 Example code has a simple "top" like output every two seconds to the serial port.<br/>
 <pre>
