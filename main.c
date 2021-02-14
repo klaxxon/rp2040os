@@ -35,7 +35,6 @@ typedef struct CpuStats {
   uint64_t contextTime;
   uint64_t idleTime;
   uint64_t lastContextTime;
-  uint32_t ticks;
 } CpuStats;
 
 CpuStats cpuStats[MAX_CORES];
@@ -108,8 +107,6 @@ void addLog(uint16_t cpu, uint16_t thrd,uint16_t log) {
 */
 
 void isr_systick(void) {
-  uint8_t cpu = *(uint32_t*)(SIO_BASE);
-  cpuStats[cpu].ticks++;
   // Kick off PendSV
   *(volatile uint32_t *)(0xe0000000|M0PLUS_ICSR_OFFSET) = (1L<<28);
 }
@@ -126,9 +123,6 @@ void contextSwitch() {
   currentThread[cpu]->lastcpu = cpu;
   currentThread[cpu]->cpu = 0xff;
   sysCount++;
-  if (cpu == 1) {
-    cpu = 1;
-  }
 
   uint8_t cpriority = 255;
   // Unblock anything waiting if time is up
