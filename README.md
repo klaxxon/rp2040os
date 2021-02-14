@@ -12,7 +12,7 @@ Mutexes<br/>
 Stack checks (issues breakpoint)<br/>
 <br/>
 <br/>
-The context switch times on the 125MHz Pico are:<br/>
+The context switch times on the 125MHz Pico with four threads are:<br/>
 No optimizations <br/>
 <table>
    <tr><th></th><th>Context Time</th></tr>
