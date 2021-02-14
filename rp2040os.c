@@ -1,6 +1,5 @@
 #include "rp2040os.h"
 
-
 CpuStats cpuStats[MAX_CORES];
 struct Thread threads[MAX_TASKS];
 uint8_t threadCount = MAX_CORES;  // 0-MAX_CORES is idleThread

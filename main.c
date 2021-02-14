@@ -7,7 +7,7 @@
 #define OSC_PIN 15
 #define SQ_PIN 14
 
-
+#define CONTEXTSW_PIN SQ_PIN
 
 
 

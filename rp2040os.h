@@ -2,19 +2,15 @@
 #include "pico/multicore.h"
 #include "hardware/timer.h"
 #include "hardware/irq.h"
+#include "osConfig.h"
 
 
-#define SYSTEM_CLOCK_HZ 125000000
-#define MAX_CORES 2
-#define USER_TASKS 5
 // Each core has its own idle thread 
 #define MAX_TASKS (MAX_CORES + USER_TASKS)
-#define SCHED_INTERVAL_US 10000
 #define SCHED_TIMER_NUM 0
 #define SCHED_IRQ TIMER_IRQ_0
 #define IDLE_STACKSIZE 100
 #define CONTEXTSWITCH_SPINLOCK ((uint32_t*)(SIO_BASE+SIO_SPINLOCK0_OFFSET))
-#define USE_THREAD_NAMES 1
 #define SYSTCOUNTER ((SYSTEM_CLOCK_HZ / 1000000)*SCHED_INTERVAL_US)
 
 #define GPIO_OUT_SET 0x014
