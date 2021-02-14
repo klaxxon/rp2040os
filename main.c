@@ -73,13 +73,6 @@ void report() {
       char cpu = '0' + t->lastcpu;
       printf("%3d %6.3f%%  %c\n", t->priority, 100.0*telapsed/elapsed, cpu);
     }
-    /*
-    printf("Logs ");
-    for(uint8_t a=0;a<32;a++) {
-      printf("%04d ", logs[(logpos+a)&31]);
-    }
-    printf("\n");
-    */
   }
 }
 
