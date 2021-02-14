@@ -118,6 +118,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c" "/home/jgettys/Development/rp2040os/build/CMakeFiles/main.dir/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj"
   "/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdlib/stdlib.c" "/home/jgettys/Development/rp2040os/build/CMakeFiles/main.dir/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdlib/stdlib.c.obj"
   "/home/jgettys/Development/rp2040os/main.c" "/home/jgettys/Development/rp2040os/build/CMakeFiles/main.dir/main.c.obj"
+  "/home/jgettys/Development/rp2040os/rp2040os.c" "/home/jgettys/Development/rp2040os/build/CMakeFiles/main.dir/rp2040os.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

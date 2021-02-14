@@ -1274,6 +1274,33 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.c.s
 .PHONY : main.c.s
 
+rp2040os.obj: rp2040os.c.obj
+
+.PHONY : rp2040os.obj
+
+# target to build an object file
+rp2040os.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/rp2040os.c.obj
+.PHONY : rp2040os.c.obj
+
+rp2040os.i: rp2040os.c.i
+
+.PHONY : rp2040os.i
+
+# target to preprocess a source file
+rp2040os.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/rp2040os.c.i
+.PHONY : rp2040os.c.i
+
+rp2040os.s: rp2040os.c.s
+
+.PHONY : rp2040os.s
+
+# target to generate assembly for a file
+rp2040os.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/rp2040os.c.s
+.PHONY : rp2040os.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1407,6 +1434,9 @@ help:
 	@echo "... main.obj"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... rp2040os.obj"
+	@echo "... rp2040os.i"
+	@echo "... rp2040os.s"
 .PHONY : help
 
 

@@ -179,7 +179,7 @@
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..."
 				}
 			],
 			"type" : "STRING",
@@ -423,10 +423,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "C compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "/usr/bin/arm-none-eabi-gcc-6.3.1"
 		},
 		{
@@ -1479,7 +1479,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : " /home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs"
+			"value" : " /home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs /home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs /home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs /home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs"
 		},
 		{
 			"name" : "PICO_DOXYGEN_PATHS",

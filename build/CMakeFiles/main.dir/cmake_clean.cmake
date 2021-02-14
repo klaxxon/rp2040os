@@ -47,6 +47,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj"
   "CMakeFiles/main.dir/home/jgettys/Development/pico-sdk/src/rp2_common/pico_stdlib/stdlib.c.obj"
   "CMakeFiles/main.dir/main.c.obj"
+  "CMakeFiles/main.dir/rp2040os.c.obj"
   "main.elf"
   "main.pdb"
 )

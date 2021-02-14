@@ -4,10 +4,7 @@
 
 #define LED_PIN 25 
 #define LED_PIN2 16
-#define OSC_PIN 15
-#define SQ_PIN 14
-
-#define CONTEXTSW_PIN SQ_PIN
+#define CONTEXTSW_PIN 14
 
 
 
@@ -87,18 +84,6 @@ void report() {
 }
 
 
-
-static uint32_t hogStack[128];
-void hog() {
-  while (true) {
-    setGPIO(SQ_PIN);
-    delayms(10);
-    clrGPIO(SQ_PIN);
-    delayms(10);
-  }
-}
-
-
 static uint32_t spinnerStack[128];
 void spinner() {
   while (true);
@@ -111,15 +96,14 @@ int main() {
   gpio_set_dir(LED_PIN, GPIO_OUT);
   gpio_init(LED_PIN2);
   gpio_set_dir(LED_PIN2, GPIO_OUT);
-  gpio_init(OSC_PIN);
-  gpio_set_dir(OSC_PIN, GPIO_OUT);
-  gpio_init(SQ_PIN);
-  gpio_set_dir(SQ_PIN, GPIO_OUT);
+  gpio_init(CONTEXTSW_PIN);
+  gpio_set_dir(CONTEXTSW_PIN, GPIO_OUT);
+  gpio_init(CONTEXTSW_PIN+1);
+  gpio_set_dir(CONTEXTSW_PIN+1, GPIO_OUT);
 
   addThread("Red LED", blink, blinkStack, sizeof(blinkStack)>>2, 100);
   addThread("Green LED", blink2, blink2Stack, sizeof(blink2Stack)>>2, 100);
   addThread("Report", report, repStack, sizeof(repStack)>>2, 255);
-  addThread("SquareHog", hog, hogStack, sizeof(hogStack)>>2, 0);
   addThread("Spinner", spinner, spinnerStack, sizeof(spinnerStack)>>2, 150);
   setupSched(); // No return
 }

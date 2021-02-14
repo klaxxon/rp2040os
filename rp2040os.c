@@ -35,7 +35,6 @@ void contextSwitch() {
   uint64_t now = getTimeUs();
   uint8_t cpu = *(uint32_t*)(SIO_BASE);
   uint32_t elapsed = (now - cpuStats[cpu].lastContextTime);
-  cpuStats[cpu].lastContextTime = now;
   cpuStats[cpu].csCount++;
 
   currentThread[cpu]->execTime += elapsed;
@@ -43,9 +42,6 @@ void contextSwitch() {
   currentThread[cpu]->cpu = 0xff;
 
   // Mutex section
-  #ifdef CONTEXTSW_PIN
-  setGPIO(SQ_PIN+cpu);
-  #endif
   contextLock();
 
   uint8_t cpriority = 255;
@@ -88,11 +84,9 @@ void contextSwitch() {
   currentThread[cpu] = &threads[currentIdx];
   currentThread[cpu]->cpu = cpu;
   contextUnlock();
-  #ifdef CONTEXTSW_PIN
-  clrGPIO(SQ_PIN+cpu);
-  #endif
   uint32_t ctime = getTimeUs()-now; // Context time
   cpuStats[cpu].contextTime +=  ctime; // SysTick counter decrements
+  cpuStats[cpu].lastContextTime = getTimeUs();
 }
 
 static uint32_t idleStack[MAX_CORES][IDLE_STACKSIZE];
