@@ -3,10 +3,17 @@
 Hobby project to create a simple, pre-emptive, real-time OS support
 for the RP2040. Current capabilities include: <br/>
 <br/>
+Pre-emptive<br/>
 Thread priority<br/>
-Efficient sleep/delay<br/>
-Cooperative yield<br/>
+Waits/delays<br/>
+Yield<br/>
+Mutexes<br/>
 <br/>
+<br/>
+As of 917b17b7, the context switch times on the 125MHz Pico are:<br/>
+No optimizations <br/>
+No stats collection:  5.8 uS<br/>
+With stats collecton: 9.5 uS<br/>
 <br/>
 Example code has a simple "top" like output every second to the serial port.<br/>
 <pre>
