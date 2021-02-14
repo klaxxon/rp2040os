@@ -39,11 +39,12 @@ void report() {
   uint64_t lastTime = getTimeUs();
   uint64_t lasts[MAX_TASKS]={0};
   while (true) {
-    delayms(1000);
+    delayms(2000);
     uint64_t now = getTimeUs();
     uint64_t elapsed = now - lastTime;
     lastTime = now;
-    printf("\nWall time %llu\n", now/1000000);
+    uint64_t tm = now / 1000000;
+    printf("\n\nWall time %llu:%02llu\n", tm/60,tm%60);
     for(uint8_t a=0;a<MAX_CORES;a++) {
       uint64_t exec = threads[a].execTime-lasts[a];
       printf("CPU%d Ctx=%0.3f%%, ", a, 100.0*cpuStats[a].contextTime/now);
