@@ -46,6 +46,7 @@ typedef struct Thread {
   uint8_t priority;
   volatile uint8_t cpu; // Active on CPU, 255 = not active
   volatile uint8_t lastcpu; // Last cpu used
+  volatile bool yielded;
 } Thread;
 
 extern CpuStats cpuStats[MAX_CORES];
@@ -57,11 +58,12 @@ void delayus(uint32_t us);
 #define delayms(x) delayus(x*1000)
 void startStackThread(uint32_t stackPtr);
 uint64_t getTimeUs();
+uint8_t getPID();
 
 
 // 
 void setupSched();
-static inline void yield();
+void yield();
 // Adds a thread to OS.  Stack points to the beginning of thread stack.  Len is the size of the thread stack.
 #ifdef USE_THREAD_NAMES
 void addThread(char *name, void(*hndl)(void*), uint32_t *stack, uint16_t len, uint8_t priority);
