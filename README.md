@@ -10,10 +10,9 @@ Yield<br/>
 <br/>
 <br/>
 As of 917b17b7, the context switch times on the 125MHz Pico are:<br/>
-### No optimizations <br/>
+No optimizations <br/>
 No stats collection:  5.8 uS<br/>
-With stats collecton: 9.8 uS<br/>
-**Note: debug build, no optimizations<br/>
+With stats collecton: 9.5 uS<br/>
 <br/>
 Example code has a simple "top" like output every second to the serial port.<br/>
 <pre>
