@@ -1,21 +1,27 @@
 ### Raspberry Pi RP2040 Realtime OS <br/>
 <br/>
 Hobby project to create a simple, pre-emptive, real-time OS support
-for the RP2040. Current capabilities include: <br/>
+for the RP2040. Scheduler code is written in C to allow for easy
+experimentation.  Current capabilities include: <br/>
 <br/>
 Pre-emptive<br/>
 Thread priority<br/>
 Waits/delays<br/>
-Yield<br/>
+Cooperative yield<br/>
 Mutexes<br/>
+Stack checks (issues breakpoint)<br/>
 <br/>
 <br/>
-As of 917b17b7, the context switch times on the 125MHz Pico are:<br/>
+The context switch times on the 125MHz Pico are:<br/>
 No optimizations <br/>
-No stats collection:  5.8 uS<br/>
-With stats collecton: 9.5 uS<br/>
+<table>
+   <tr><th></th><th>Context Time</th></tr>
+   <tr><td>No stats collection:</td><td>5.8 uS</td></tr>
+   <tr><td>With stats collecton:</td><td>9.5 uS</td></tr>
+   <tr><td>With stats/stack checks:</td><td> 9.9 uS</td></tr>
+</table>
 <br/>
-Example code has a simple "top" like output every second to the serial port.<br/>
+Example code has a simple "top" like output every two seconds to the serial port.<br/>
 <pre>
 Wall time 15
 CPU0 Ctx=0.102%, Util=100.000%  Idle=  0.000%
@@ -28,7 +34,7 @@ Thrd   Name     S PRI  CPU     LastCPU
 </pre>
 
 
-The current implementation consists of three files:<br/>
+The current implementation consists of three files and a main example:<br/>
 <br/>
 <pre>
 rp2040os.h    OS header
