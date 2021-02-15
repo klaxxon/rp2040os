@@ -44,11 +44,14 @@ void report() {
     uint64_t elapsed = now - lastTime;
     lastTime = now;
     uint64_t tm = now / 1000000;
-    printf("\n\nWall time %llu:%02llu\n", tm/60,tm%60);
+    printf("\n\nWall time %llu:%02llu:%02llu\n", tm/3600, (tm%3600)/60,tm%60);
     for(uint8_t a=0;a<MAX_CORES;a++) {
       uint64_t exec = threads[a].execTime-lasts[a];
       printf("CPU%d Ctx=%0.3f%%, ", a, 100.0*cpuStats[a].contextTime/now);
       float cpu = (100.0*exec)/elapsed;
+      if (cpu > 100) { // We are using the current time, which will allow an interrupt to be off by a little
+        cpu = 100;
+      }
       printf("Util=%7.3f%%  Idle=%7.3f%%\n", 100-cpu, cpu);
       lasts[a] = threads[a].execTime;
     }
