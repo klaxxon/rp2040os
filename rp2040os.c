@@ -15,8 +15,8 @@ void setPSPControl(uint32_t sp, uint32_t ctrl);
 
 uint64_t getTimeUs() {
   uint64_t tm = *(volatile uint32_t*)(TIMER_BASE + 0x0c);
-  tm |= (*(uint32_t*)(TIMER_BASE + 0x08))<<16;
-  return tm;
+  uint64_t htm = *(volatile uint32_t*)(TIMER_BASE + 0x08);
+  return (htm<<32)|tm;
 }
 
 static inline void contextLock() {
@@ -197,6 +197,7 @@ void yield() {
 
 
 void removeTask() {
+  contextLock();
   Thread *t = &threads[getPID()];
   t->status = THREAD_STATUS_ZOMBIE;
   // Find thread pointing to this one
@@ -206,6 +207,7 @@ void removeTask() {
       break;
     }
   }
+  contextUnlock();
   while(1);
 }
 
