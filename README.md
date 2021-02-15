@@ -12,7 +12,7 @@ Mutexes<br/>
 Stack checks (issues breakpoint)<br/>
 <br/>
 <br/>
-The context switch times on the 125MHz Pico are:<br/>
+The context switch times on the 125MHz Pico with four threads are:<br/>
 No optimizations <br/>
 <table>
    <tr><th></th><th>Context Time</th></tr>
@@ -23,14 +23,15 @@ No optimizations <br/>
 <br/>
 Example code has a simple "top" like output every two seconds to the serial port.<br/>
 <pre>
-Wall time 15
-CPU0 Ctx=0.102%, Util=100.000%  Idle=  0.000%
-CPU1 Ctx=0.097%, Util=  2.251%  Idle= 97.749%
+Wall time 0:36
+CPU0 Ctx=0.144%, Util=  1.215%  Idle= 98.785%
+CPU1 Ctx=0.079%, Util=  0.082%  Idle= 99.918%
 Thrd   Name     S PRI  CPU     LastCPU
-   0 Red LED    W 100  0.002%  0
+   0 Red LED    W 100  0.001%  0
    1 Green LED  W 100  0.011%  0
-   2 Report     R 255  2.141%  1
-   3 Spinner    R 150 99.874%  0
+   2 Report     R 255  1.100%  0
+   3 Spinner    Z 150  0.000%  1
+
 </pre>
 
 
