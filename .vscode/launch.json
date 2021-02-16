@@ -14,7 +14,7 @@
       "configFiles": ["interface/picoprobe.cfg", "target/rp2040.cfg"],
       "interface": "swd",
       "device": "RP2040",
-      "svdFile": "/home/jgettys/Development/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+      "svdFile": "{{YOUR_PICO-SDK_DIRECTORY}}/src/rp2040/hardware_regs/rp2040.svd",
       "runToMain": false,
       "preRestartCommands": [
         "file ./build/main.elf",
