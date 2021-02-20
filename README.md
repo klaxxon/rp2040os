@@ -1,6 +1,6 @@
 ### Raspberry Pi RP2040 Realtime OS <br/>
 <br/>
-Hobby project to create a simple, pre-emptive, real-time OS support
+Learning project to create a pre-emptive, real-time OS support
 for the RP2040. Scheduler code is written in C to allow for easy
 experimentation.  Current capabilities include: <br/>
 <br/>
